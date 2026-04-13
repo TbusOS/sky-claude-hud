@@ -96,35 +96,23 @@ def main():
     # -- Line 1: model | context bar | cost | duration | lines --
     parts1 = []
 
-    # Model + effort level
+    # Model
     model = ""
     m = d.get("model", {})
     if isinstance(m, dict):
         model = m.get("display_name") or m.get("id", "")
     if model:
-        effort = d.get("effort_level") or d.get("effortLevel") or ""
-        if not effort:
-            try:
-                with open(os.path.expanduser("~/.claude/settings.json")) as f:
-                    effort = json.load(f).get("effortLevel", "")
-            except Exception:
-                pass
-        effort_str = ""
-        if effort:
-            ec = {
-                "max": RED, "high": YELLOW, "medium": GREEN, "low": DIM,
-            }.get(effort, DIM)
-            effort_str = f" {ec}[{effort}]{RST}"
-        parts1.append(
-            f"{BOLD}{MAGENTA}\u25c6{RST} {BOLD}{WHITE}{model}{RST}{effort_str}"
-        )
+        parts1.append(f"{BOLD}{MAGENTA}\u25c6{RST} {BOLD}{WHITE}{model}{RST}")
 
-    # Context window
+    # Context window (with 200k overflow warning)
     ctx = d.get("context_window", {})
     if ctx:
         pct = ctx.get("used_percentage")
         if pct is not None:
-            parts1.append(make_bar(pct))
+            bar = make_bar(pct)
+            if d.get("exceeds_200k_tokens"):
+                bar += f" {RED}\u26a0 200k+{RST}"
+            parts1.append(bar)
 
     # Cost
     cost = d.get("cost", {})
@@ -151,12 +139,8 @@ def main():
 
     cwd = d.get("cwd", "")
 
-    # Git branch: try Claude JSON worktree first, then detect via git
-    wt = d.get("worktree", {})
     branch = ""
-    if isinstance(wt, dict):
-        branch = wt.get("branch", "")
-    if not branch and cwd:
+    if cwd:
         try:
             r = subprocess.run(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"],
