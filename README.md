@@ -7,11 +7,11 @@ A lightweight statusline for [Claude Code](https://docs.anthropic.com/en/docs/cl
 ## Preview / 预览
 
 ```
-◆ Claude Opus 4.6 [high] │ ████████████░░░░░░░░ 58% │ $1.23 │ ⏱ 12m04s │ +42 -7
+◆ Claude Opus 4.6 │ ████████████░░░░░░░░ 58% │ $1.23 │ ⏱ 12m04s │ +42 -7
 ▸ ~/project │ ⎇ feat/my-branch │ ✱ modified │ 5h ████░░░░ 51%
 ```
 
-**Line 1 / 第一行:** Model & effort level, context window usage bar, session cost, duration, lines changed
+**Line 1 / 第一行:** Model, context window usage bar, session cost, duration, lines changed
 
 **Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage
 
@@ -78,16 +78,19 @@ stdin (JSON) → statusline.py → stdout (ANSI-colored text)
 | Field | Description / 说明 |
 |---|---|
 | `model.display_name` | Model name / 模型名称 |
-| `effort_level` | Thinking effort / 思考深度 |
 | `context_window.used_percentage` | Context usage % / 上下文使用率 |
+| `exceeds_200k_tokens` | 200k+ overflow flag / 超 200k 警告 |
 | `cost.total_cost_usd` | Session cost / 会话费用 |
 | `cost.total_duration_ms` | Session duration / 会话时长 |
 | `cost.total_lines_added` | Lines added / 新增行数 |
 | `cost.total_lines_removed` | Lines removed / 删除行数 |
 | `cwd` | Working directory / 工作目录 |
-| `worktree.branch` | Git branch (from Claude) / Git 分支 |
-| `rate_limits.five_hour` | 5-hour rate limit / 5 小时速率限制 |
-| `rate_limits.seven_day` | 7-day rate limit / 7 天速率限制 |
+| `rate_limits.five_hour.used_percentage` | 5-hour rate limit / 5 小时速率限制 |
+| `rate_limits.seven_day.used_percentage` | 7-day rate limit / 7 天速率限制 |
+
+Git branch is detected by shelling out to `git rev-parse` in `cwd`, not from the JSON.
+
+Git 分支通过在 `cwd` 下执行 `git rev-parse` 获取，不从 JSON 解析。
 
 ## Uninstall / 卸载
 
