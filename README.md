@@ -8,12 +8,12 @@ A lightweight statusline for [Claude Code](https://docs.anthropic.com/en/docs/cl
 
 ```
 ◆ Claude Opus 4.6 │ ████████████░░░░░░░░ 58% │ $1.23 │ ⏱ 12m04s │ +42 -7
-▸ ~/project │ ⎇ feat/my-branch │ ✱ modified │ 5h ████░░░░ 51%
+▸ ~/project │ ⎇ feat/my-branch │ ✱ modified │ 5h ████░░░░ 51% →18:44 │ 7d █░░░░░░░ 23% →05-03 16:34
 ```
 
 **Line 1 / 第一行:** Model, context window usage bar, session cost, duration, lines changed
 
-**Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage
+**Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage with next-reset time (`HH:MM` if today, `MM-DD HH:MM` if cross-day) / 速率限制百分比 + 下次重置时间（同日只显示 `HH:MM`，跨日显示 `MM-DD HH:MM`）
 
 ## Features / 特性
 
@@ -86,7 +86,9 @@ stdin (JSON) → statusline.py → stdout (ANSI-colored text)
 | `cost.total_lines_removed` | Lines removed / 删除行数 |
 | `cwd` | Working directory / 工作目录 |
 | `rate_limits.five_hour.used_percentage` | 5-hour rate limit / 5 小时速率限制 |
+| `rate_limits.five_hour.resets_at` | 5h reset time, unix epoch / 5h 重置时间戳 |
 | `rate_limits.seven_day.used_percentage` | 7-day rate limit / 7 天速率限制 |
+| `rate_limits.seven_day.resets_at` | 7d reset time, unix epoch / 7d 重置时间戳 |
 
 Git branch is detected by shelling out to `git rev-parse` in `cwd`, not from the JSON.
 

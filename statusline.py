@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime
 
 # ANSI colors
 RST = "\033[0m"
@@ -70,6 +71,17 @@ def fmt_lines(added, removed):
     return " ".join(parts) if parts else ""
 
 
+def fmt_reset(ts):
+    if ts is None or ts <= 0:
+        return ""
+    try:
+        reset = datetime.fromtimestamp(ts)
+    except (OSError, OverflowError, ValueError):
+        return ""
+    fmt = "%H:%M" if reset.date() == datetime.now().date() else "%m-%d %H:%M"
+    return f" {DIM}→{reset.strftime(fmt)}{RST}"
+
+
 def fmt_rate(data, label):
     if not data:
         return ""
@@ -80,7 +92,7 @@ def fmt_rate(data, label):
     w = 8
     filled = int(pct * w / 100)
     bar = f"{c}{FILL * filled}{DIM}{EMPTY * (w - filled)}{RST}"
-    return f"{label} {bar} {c}{pct:.0f}%{RST}"
+    return f"{label} {bar} {c}{pct:.0f}%{RST}{fmt_reset(data.get('resets_at'))}"
 
 
 def main():
