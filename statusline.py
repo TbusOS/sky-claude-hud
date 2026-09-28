@@ -86,7 +86,7 @@ def fmt_rate(data, label):
     if not data:
         return ""
     pct = data.get("used_percentage", 0)
-    if pct is None or pct == 0:
+    if pct is None:
         return ""
     c = color_by_pct(pct)
     w = 8

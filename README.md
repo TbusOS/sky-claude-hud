@@ -13,7 +13,7 @@ A lightweight statusline for [Claude Code](https://docs.anthropic.com/en/docs/cl
 
 **Line 1 / 第一行:** Model, context window usage bar, session cost, duration, lines changed
 
-**Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage with next-reset time (`HH:MM` if today, `MM-DD HH:MM` if cross-day) / 速率限制百分比 + 下次重置时间（同日只显示 `HH:MM`，跨日显示 `MM-DD HH:MM`）
+**Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage with next-reset time (`HH:MM` if today, `MM-DD HH:MM` if cross-day; a window is shown whenever Claude Code reports it, including `0%` right after a reset) / 速率限制百分比 + 下次重置时间（同日只显示 `HH:MM`，跨日显示 `MM-DD HH:MM`；只要 Claude Code 传了该窗口就显示，刚重置用量为 `0%` 时也显示）
 
 ## Features / 特性
 
