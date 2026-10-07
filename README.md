@@ -1,19 +1,22 @@
 # Sky Claude HUD
 
-A lightweight statusline for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that works over SSH and in terminals like Xshell. No GUI, no browser — just a compact two-line HUD rendered with ANSI escape codes.
+A lightweight statusline for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that works over SSH and in terminals like Xshell. No GUI, no browser — just a compact three-line HUD rendered with ANSI escape codes.
 
-一个轻量级的 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 状态栏，适用于 SSH 和 Xshell 等终端环境。无需 GUI 或浏览器，仅通过 ANSI 转义码渲染紧凑的两行 HUD。
+一个轻量级的 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) 状态栏，适用于 SSH 和 Xshell 等终端环境。无需 GUI 或浏览器，仅通过 ANSI 转义码渲染紧凑的三行 HUD。
 
 ## Preview / 预览
 
 ```
 ◆ Claude Opus 4.6 │ ████████████░░░░░░░░ 58% │ $1.23 │ ⏱ 12m04s │ +42 -7
-▸ ~/project │ ⎇ feat/my-branch │ ✱ modified │ 5h ████░░░░ 51% →18:44 │ 7d █░░░░░░░ 23% →05-03 16:34
+▸ ~/project │ ⎇ feat/my-branch │ ✱ modified
+5h ████░░░░ 51% →18:44 │ 7d █░░░░░░░ 23% →05-03 16:34
 ```
 
 **Line 1 / 第一行:** Model, context window usage bar, session cost, duration, lines changed
 
-**Line 2 / 第二行:** Working directory, git branch & dirty state, API rate limit usage with next-reset time (`HH:MM` if today, `MM-DD HH:MM` if cross-day; a window is shown whenever Claude Code reports it, including `0%` right after a reset) / 速率限制百分比 + 下次重置时间（同日只显示 `HH:MM`，跨日显示 `MM-DD HH:MM`；只要 Claude Code 传了该窗口就显示，刚重置用量为 `0%` 时也显示）
+**Line 2 / 第二行:** Working directory, git branch & dirty state / 工作目录、git 分支与改动状态
+
+**Line 3 / 第三行:** API rate limit usage with next-reset time (5h: `HH:MM` if today, `MM-DD HH:MM` if cross-day; 7d: always `MM-DD HH:MM`, since the window spans several days; a window is shown whenever Claude Code reports it, including `0%` right after a reset). Kept on its own line because Claude Code truncates each statusline line from the right when it is wider than the available space; sharing a line with a long path used to cut off the 7d reset time / 速率限制百分比 + 下次重置时间（5h 同日只显示 `HH:MM`、跨日显示 `MM-DD HH:MM`；7d 窗口跨好几天，一律显示 `MM-DD HH:MM`；只要 Claude Code 传了该窗口就显示，刚重置用量为 `0%` 时也显示）。单独占一行，是因为 Claude Code 会把超出可用宽度的行从右边截掉，以前跟长路径挤在一行时 7d 的重置时间会被截没
 
 ## Features / 特性
 
@@ -65,9 +68,9 @@ Edit `~/.claude/settings.json` and add:
 
 ## How it works / 工作原理
 
-Claude Code pipes a JSON blob to the statusline command's stdin on every status update. `statusline.py` parses the JSON and prints two formatted lines to stdout:
+Claude Code pipes a JSON blob to the statusline command's stdin on every status update. `statusline.py` parses the JSON and prints up to three formatted lines to stdout (line 3 is omitted when Claude Code sends no rate limits, e.g. with an API key):
 
-Claude Code 在每次状态更新时，将一个 JSON 数据通过 stdin 传入 statusline 命令。`statusline.py` 解析 JSON 后输出两行格式化文本到 stdout：
+Claude Code 在每次状态更新时，将一个 JSON 数据通过 stdin 传入 statusline 命令。`statusline.py` 解析 JSON 后输出最多三行格式化文本到 stdout（Claude Code 没传速率限制时没有第三行，例如用 API key 时）：
 
 ```
 stdin (JSON) → statusline.py → stdout (ANSI-colored text)

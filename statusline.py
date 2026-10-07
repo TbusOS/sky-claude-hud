@@ -71,18 +71,20 @@ def fmt_lines(added, removed):
     return " ".join(parts) if parts else ""
 
 
-def fmt_reset(ts):
+def fmt_reset(ts, always_date=False):
     if ts is None or ts <= 0:
         return ""
     try:
         reset = datetime.fromtimestamp(ts)
     except (OSError, OverflowError, ValueError):
         return ""
-    fmt = "%H:%M" if reset.date() == datetime.now().date() else "%m-%d %H:%M"
+    # A 7-day window spans several days, so a bare HH:MM does not say which day
+    same_day = reset.date() == datetime.now().date()
+    fmt = "%H:%M" if same_day and not always_date else "%m-%d %H:%M"
     return f" {DIM}→{reset.strftime(fmt)}{RST}"
 
 
-def fmt_rate(data, label):
+def fmt_rate(data, label, always_date=False):
     if not data:
         return ""
     pct = data.get("used_percentage", 0)
@@ -92,7 +94,8 @@ def fmt_rate(data, label):
     w = 8
     filled = int(pct * w / 100)
     bar = f"{c}{FILL * filled}{DIM}{EMPTY * (w - filled)}{RST}"
-    return f"{label} {bar} {c}{pct:.0f}%{RST}{fmt_reset(data.get('resets_at'))}"
+    reset = fmt_reset(data.get("resets_at"), always_date)
+    return f"{label} {bar} {c}{pct:.0f}%{RST}{reset}"
 
 
 def main():
@@ -146,7 +149,7 @@ def main():
     if parts1:
         print(SEP.join(parts1))
 
-    # -- Line 2: git branch or cwd | rate limits --
+    # -- Line 2: git branch or cwd --
     parts2 = []
 
     cwd = d.get("cwd", "")
@@ -196,18 +199,24 @@ def main():
         if git_flags:
             parts2.append(" ".join(git_flags))
 
-    # Rate limits
+    if parts2:
+        print(SEP.join(parts2))
+
+    # -- Line 3: rate limits --
+    # Own line: Claude Code truncates each statusline line from the right,
+    # and a long cwd/branch on line 2 used to cut off the 7d reset time.
+    parts3 = []
     rl = d.get("rate_limits", {})
     if isinstance(rl, dict):
         r5 = fmt_rate(rl.get("five_hour"), f"{DIM}5h{RST}")
-        r7 = fmt_rate(rl.get("seven_day"), f"{DIM}7d{RST}")
+        r7 = fmt_rate(rl.get("seven_day"), f"{DIM}7d{RST}", always_date=True)
         if r5:
-            parts2.append(r5)
+            parts3.append(r5)
         if r7:
-            parts2.append(r7)
+            parts3.append(r7)
 
-    if parts2:
-        print(SEP.join(parts2))
+    if parts3:
+        print(SEP.join(parts3))
 
 
 if __name__ == "__main__":
